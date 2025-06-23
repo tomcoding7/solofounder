@@ -53,43 +53,72 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Founder Quest</h1>
-          <p className="text-gray-600">Level up your entrepreneurship journey</p>
-        </div>
+    <main className="min-h-screen py-12 px-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(168,85,247,0.1),rgba(0,0,0,0))]" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTMwIDMwbDMwIDMwTTMwIDMwTDAgNjBNMzAgMzBMMzAgME0zMCAzMEwwIDAiIHN0cm9rZT0icmdiYSgxNjgsODUsMjQ3LDAuMSkiIHN0cm9rZS13aWR0aD0iMC41Ii8+PC9zdmc+')] opacity-5" />
+      
+      <div className="max-w-6xl mx-auto relative">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 mb-3 text-shadow-glow">
+            Founder Quest
+          </h1>
+          <p className="text-gray-400 text-lg">Level up your entrepreneurship journey</p>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-gray-900/50 backdrop-blur-sm rounded-xl shadow-lg border border-purple-500/20 p-6"
+            >
               <XPBar xp={user.xp} level={calculateLevel(user.xp)} />
               {user.streak > 0 && (
-                <div className="mt-4 flex justify-center">
+                <div className="mt-6">
                   <Streak streak={user.streak} />
                 </div>
               )}
-            </div>
+            </motion.div>
 
-            <ProgressChart actions={user.actions} />
-
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Actions</h2>
-              <div className="grid gap-3">
-                {ACTIONS.map((action) => (
-                  <ActionButton
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
+                Available Actions
+              </h2>
+              <div className="grid gap-4">
+                {ACTIONS.map((action, index) => (
+                  <motion.div
                     key={action.id}
-                    action={action}
-                    onClick={() => handleAction(action.id)}
-                  />
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <ActionButton action={action} onClick={() => handleAction(action.id)} />
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="space-y-8">
+          <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             <Leaderboard currentUser={user} />
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -99,10 +128,10 @@ export default function Home() {
             initial={{ scale: 0, y: 50 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0, y: 50 }}
-            className="fixed bottom-8 right-8 bg-purple-600 text-white px-6 py-3 rounded-lg shadow-lg"
+            className="fixed bottom-8 right-8 bg-purple-900/90 backdrop-blur-sm text-white px-8 py-4 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.3)] border border-purple-400/50"
           >
-            <h3 className="text-xl font-bold">Level Up! 🎉</h3>
-            <p>You reached Level {calculateLevel(user.xp)}!</p>
+            <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-100">Level Up! 🎉</h3>
+            <p className="text-purple-200">You reached Level {calculateLevel(user.xp)}!</p>
           </motion.div>
         )}
       </AnimatePresence>
