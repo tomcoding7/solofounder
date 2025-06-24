@@ -11,6 +11,8 @@ export interface User {
   actions: CompletedAction[];
   streak: number;
   lastActionDate: string | null;
+  class: FounderClass;
+  stats: FounderStats;
 }
 
 export interface CompletedAction {
@@ -19,6 +21,15 @@ export interface CompletedAction {
   timestamp: string;
   xp: number;
 }
+
+export interface FounderStats {
+  execution: number;
+  resilience: number;
+  conviction: number;
+  influence: number;
+}
+
+export type FounderClass = 'Indie Hacker' | 'AI Builder' | 'Content Creator' | 'Community Leader';
 
 export const ACTIONS: Action[] = [
   { id: 'post', name: 'Post Content', xp: 10, icon: '📝' },
@@ -53,4 +64,35 @@ export const LEVEL_TITLES = [
   'Titan',
   'Mogul',
   'Empire Builder',
-]; 
+];
+
+export const FOUNDER_CLASSES: Record<FounderClass, { description: string; bonuses: string[] }> = {
+  'Indie Hacker': {
+    description: 'A solo developer building products and automating systems',
+    bonuses: [
+      'Ship Product/Landing Page XP +20%',
+      'Execution stat growth +10%',
+    ],
+  },
+  'AI Builder': {
+    description: 'Leveraging AI to create innovative solutions',
+    bonuses: [
+      'All XP gains +10%',
+      'Resilience stat growth +15%',
+    ],
+  },
+  'Content Creator': {
+    description: 'Building in public and sharing knowledge',
+    bonuses: [
+      'Post Content XP +30%',
+      'Influence stat growth +20%',
+    ],
+  },
+  'Community Leader': {
+    description: 'Growing and nurturing communities',
+    bonuses: [
+      'Cold DM XP +25%',
+      'Conviction stat growth +15%',
+    ],
+  },
+}; 

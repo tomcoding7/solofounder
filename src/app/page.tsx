@@ -7,12 +7,16 @@ import { getDefaultUser, updateStreak, calculateLevel } from '@/utils/game';
 import XPBar from '@/components/XPBar';
 import ActionButton from '@/components/ActionButton';
 import Streak from '@/components/Streak';
-import ProgressChart from '@/components/ProgressChart';
-import Leaderboard from '@/components/Leaderboard';
+import FounderStats from '@/components/FounderStats';
+import QuestLog from '@/components/QuestLog';
+import StartupScreen from '@/components/StartupScreen';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 export default function Home() {
   const [user, setUser] = useState<User>(getDefaultUser());
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [isStarting, setIsStarting] = useState(true);
+  const { playXP, playLevelUp, playClick, playQuest } = useSoundEffects();
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -22,6 +26,7 @@ export default function Home() {
   }, []);
 
   const handleAction = (actionId: string) => {
+    playClick();
     const action = ACTIONS.find(a => a.id === actionId);
     if (!action) return;
 
@@ -44,7 +49,10 @@ export default function Home() {
 
     if (newLevel > oldLevel) {
       setShowLevelUp(true);
+      playLevelUp();
       setTimeout(() => setShowLevelUp(false), 3000);
+    } else {
+      playXP();
     }
 
     const updatedUser = updateStreak(newUser);
@@ -52,89 +60,110 @@ export default function Home() {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  if (isStarting) {
+    return <StartupScreen onComplete={() => setIsStarting(false)} />;
+  }
+
   return (
-    <main className="min-h-screen py-12 px-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(168,85,247,0.1),rgba(0,0,0,0))]" />
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTMwIDMwbDMwIDMwTTMwIDMwTDAgNjBNMzAgMzBMMzAgME0zMCAzMEwwIDAiIHN0cm9rZT0icmdiYSgxNjgsODUsMjQ3LDAuMSkiIHN0cm9rZS13aWR0aD0iMC41Ii8+PC9zdmc+')] opacity-5" />
-      
-      <div className="max-w-6xl mx-auto relative">
-        <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
+    <main className="min-h-screen bg-[rgb(var(--deep-space))] flex items-center justify-center p-4">
+      <div className="w-full max-w-[1000px] mx-auto">
+        {/* Main Console Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="console-panel p-8 relative overflow-hidden"
         >
-          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 mb-3 text-shadow-glow">
-            Founder Quest
-          </h1>
-          <p className="text-gray-400 text-lg">Level up your entrepreneurship journey</p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-gray-900/50 backdrop-blur-sm rounded-xl shadow-lg border border-purple-500/20 p-6"
-            >
+          {/* Level and XP Section */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="console-text text-2xl font-orbitron">
+              Lv. {calculateLevel(user.xp)}
+            </div>
+            <div className="flex-1">
               <XPBar xp={user.xp} level={calculateLevel(user.xp)} />
-              {user.streak > 0 && (
-                <div className="mt-6">
-                  <Streak streak={user.streak} />
-                </div>
-              )}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="space-y-4"
-            >
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
-                Available Actions
-              </h2>
-              <div className="grid gap-4">
-                {ACTIONS.map((action, index) => (
-                  <motion.div
-                    key={action.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <ActionButton action={action} onClick={() => handleAction(action.id)} />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+            </div>
           </div>
 
-          <motion.div
-            className="space-y-8"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Leaderboard currentUser={user} />
-          </motion.div>
-        </div>
-      </div>
+          {/* Class Title */}
+          <div className="text-center mb-8">
+            <div className="console-text text-lg font-orbitron tracking-wider">
+              FOUNDER / {user?.class?.toUpperCase() || 'INDIE HACKER'}
+            </div>
+          </div>
 
-      <AnimatePresence>
-        {showLevelUp && (
-          <motion.div
-            initial={{ scale: 0, y: 50 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0, y: 50 }}
-            className="fixed bottom-8 right-8 bg-purple-900/90 backdrop-blur-sm text-white px-8 py-4 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.3)] border border-purple-400/50"
-          >
-            <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-100">Level Up! 🎉</h3>
-            <p className="text-purple-200">You reached Level {calculateLevel(user.xp)}!</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <ActionButton
+              action={ACTIONS.find(a => a.id === 'post') || ACTIONS[0]}
+              onClick={() => handleAction('post')}
+            />
+            <ActionButton
+              action={ACTIONS.find(a => a.id === 'ship') || ACTIONS[0]}
+              onClick={() => handleAction('ship')}
+            />
+            <ActionButton
+              action={ACTIONS.find(a => a.id === 'dm') || ACTIONS[0]}
+              onClick={() => handleAction('dm')}
+            />
+          </div>
+
+          {/* Stats and Logs Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stats Panel */}
+            <div className="console-panel p-4">
+              <FounderStats user={user} />
+            </div>
+
+            {/* XP Stats */}
+            <div className="console-panel p-4">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="console-text opacity-80">XP</span>
+                  <span className="console-text text-xl">↑ {user.xp}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="console-text opacity-80">STREAK</span>
+                  <span className="console-text text-xl">🔥 {user.streak}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="console-text opacity-80">CASH EARNED</span>
+                  <span className="console-text text-xl">£{user.xp * 2}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="console-text opacity-80">REJECTIONS</span>
+                  <span className="console-text text-xl">{user.actions.filter(a => a.actionId === 'reject').length}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quest Log */}
+            <div className="console-panel p-4">
+              <QuestLog user={user} />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* System Messages */}
+        <AnimatePresence>
+          {showLevelUp && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-4 right-4 console-panel p-4"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💎</span>
+                <div>
+                  <div className="console-text font-bold">LEVEL UP!</div>
+                  <div className="console-text text-sm opacity-80">
+                    +20 XP - Completed
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </main>
   );
 } 
