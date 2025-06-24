@@ -27,6 +27,7 @@ export interface User {
   momentum: Momentum;
   actions: ActionRecord[];
   achievements: Achievement[];
+  stats: FounderStats;
 }
 
 export interface Momentum {
@@ -265,5 +266,11 @@ export const MOCK_USER_DATA: User = {
     ...a,
     unlocked: a.id === 'FIRST_STEP',
     date: a.id === 'FIRST_STEP' ? new Date().toISOString() : null
-  }))
+  })),
+  stats: {
+    execution: 0,
+    resilience: 0,
+    conviction: 0,
+    influence: 0
+  }
 }; 
