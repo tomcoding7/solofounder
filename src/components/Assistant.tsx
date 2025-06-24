@@ -1,89 +1,66 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { User } from '@/types/game';
+import { calculateLevel } from '@/utils/game';
 
 interface AssistantProps {
   user: User;
 }
 
-const Assistant: React.FC<AssistantProps> = ({ user }) => {
-  const getAssistantMood = () => {
-    // Check momentum status
-    const lastAction = user.momentum.lastActionTimestamp 
-      ? new Date(user.momentum.lastActionTimestamp)
-      : null;
-    
-    if (!lastAction) {
-      return {
-        emoji: '🤔',
-        message: "Ready to start your founder journey?",
-        color: 'text-blue-400'
-      };
+export default function Assistant({ user }: AssistantProps) {
+  const [message, setMessage] = useState('');
+  const [mood, setMood] = useState<'neutral' | 'happy' | 'excited'>('neutral');
+
+  useEffect(() => {
+    // Check if this is the first login
+    if (user.actions.length === 0) {
+      setMessage(`Welcome to Solo Founder System! I'm your AI assistant. Let's start your founder journey by completing some actions. Each action will earn you XP and help you level up!`);
+      setMood('excited');
+      return;
     }
 
-    const hoursSinceAction = (new Date().getTime() - lastAction.getTime()) / (1000 * 60 * 60);
-    
-    if (hoursSinceAction > 48) {
-      return {
-        emoji: '😟',
-        message: "I haven't seen you in a while! Let's get back on track.",
-        color: 'text-red-400'
-      };
-    }
-    
-    if (hoursSinceAction > 24) {
-      return {
-        emoji: '😐',
-        message: "Don't lose your momentum! Take action soon.",
-        color: 'text-yellow-400'
-      };
-    }
+    // Get the last action
+    const lastAction = user.actions[user.actions.length - 1];
+    const timeSinceLastAction = Date.now() - new Date(lastAction.timestamp).getTime();
+    const hoursSinceLastAction = timeSinceLastAction / (1000 * 60 * 60);
 
-    // Check achievements
-    const completedAchievements = user.achievements.filter(a => a.completed).length;
-    if (completedAchievements > 0) {
-      return {
-        emoji: '🌟',
-        message: `Amazing progress! You've unlocked ${completedAchievements} achievements!`,
-        color: 'text-purple-400'
-      };
+    // Generate contextual messages
+    if (hoursSinceLastAction > 24) {
+      setMessage("Welcome back! Ready to continue your founder journey?");
+      setMood('happy');
+    } else if (user.momentum.isActive) {
+      setMessage(`You're on fire! Keep the momentum going with your ${Math.round(user.momentum.multiplier * 100)}% XP boost!`);
+      setMood('excited');
+    } else {
+      const level = calculateLevel(user.xp);
+      const messages = [
+        `Level ${level} ${user.class}! Keep pushing forward!`,
+        `You're making great progress. What's next on your agenda?`,
+        `Remember: consistency beats intensity. Keep showing up!`,
+      ];
+      setMessage(messages[Math.floor(Math.random() * messages.length)]);
+      setMood('neutral');
     }
+  }, [user]);
 
-    // Check streak
-    if (user.streak > 7) {
-      return {
-        emoji: '🔥',
-        message: `${user.streak} day streak! You're unstoppable!`,
-        color: 'text-green-400'
-      };
-    }
-
-    // Default positive state
-    return {
-      emoji: '😊',
-      message: "Keep pushing forward! You're doing great!",
-      color: 'text-blue-400'
-    };
+  const moodEmoji = {
+    neutral: '🤖',
+    happy: '😊',
+    excited: '🚀',
   };
 
-  const mood = getAssistantMood();
-
   return (
-    <div className="fixed bottom-4 right-4 max-w-sm">
-      <div className="bg-black/30 backdrop-blur-md rounded-lg p-4 border border-purple-500/30">
-        <div className="flex items-start space-x-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl">
-            {mood.emoji}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-orbitron text-purple-300 mb-1">AI Assistant</h3>
-            <p className={`${mood.color} text-sm`}>
-              {mood.message}
-            </p>
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed bottom-4 right-4 max-w-sm bg-black/30 backdrop-blur-md rounded-lg p-4 border border-purple-500/30"
+    >
+      <div className="flex items-start space-x-3">
+        <div className="text-2xl">{moodEmoji[mood]}</div>
+        <div>
+          <p className="text-white">{message}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
-};
-
-export default Assistant; 
+} 

@@ -1,24 +1,26 @@
+'use client';
+
 import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Solo Founder System',
-  description: 'Level up your founder journey with gamified habits and achievements.',
-  viewport: 'width=device-width, initial-scale=1.0',
-  themeColor: '#000000',
-}
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <title>Solo Founder System</title>
+        <meta name="description" content="Level up your founder journey with gamified habits and achievements." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#000000" />
+      </head>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   )
 } 
