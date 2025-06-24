@@ -33,6 +33,8 @@ export interface User {
 export interface Momentum {
   multiplier: number;
   lastActionDate: string;
+  isActive: boolean;
+  streakDays: number;
 }
 
 export interface Achievement {
@@ -40,6 +42,9 @@ export interface Achievement {
   name: string;
   description: string;
   unlocked: boolean;
+  completed: boolean;
+  progress: number;
+  target: number;
   date: string | null;
   icon?: string;
   requiredLevel?: number;
@@ -142,6 +147,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'First Step',
     description: 'Complete your first action',
     unlocked: false,
+    completed: false,
+    progress: 0,
+    target: 1,
     date: null,
     icon: '👣'
   },
@@ -150,6 +158,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Consistency I',
     description: 'Maintain a 3-day streak',
     unlocked: false,
+    completed: false,
+    progress: 0,
+    target: 3,
     date: null,
     icon: '🔥',
     requiredStreak: 3
@@ -159,6 +170,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Consistency II',
     description: 'Maintain a 7-day streak',
     unlocked: false,
+    completed: false,
+    progress: 0,
+    target: 7,
     date: null,
     icon: '🔥🔥',
     requiredStreak: 7
@@ -168,6 +182,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Getting Started',
     description: 'Reach level 5',
     unlocked: false,
+    completed: false,
+    progress: 1,
+    target: 5,
     date: null,
     icon: '⭐',
     requiredLevel: 5
@@ -177,6 +194,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Rising Star',
     description: 'Reach level 10',
     unlocked: false,
+    completed: false,
+    progress: 1,
+    target: 10,
     date: null,
     icon: '⭐⭐',
     requiredLevel: 10
@@ -184,16 +204,16 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 export const LEVEL_THRESHOLDS = [
-  0,     // Level 1
-  100,   // Level 2
-  300,   // Level 3
-  600,   // Level 4
-  1000,  // Level 5
-  1500,  // Level 6
-  2100,  // Level 7
-  2800,  // Level 8
-  3600,  // Level 9
-  4500,  // Level 10
+  0,     // Level 1: 0-99 XP
+  100,   // Level 2: 100-299 XP
+  300,   // Level 3: 300-599 XP
+  600,   // Level 4: 600-999 XP
+  1000,  // Level 5: 1000-1499 XP
+  1500,  // Level 6: 1500-2099 XP
+  2100,  // Level 7: 2100-2799 XP
+  2800,  // Level 8: 2800-3599 XP
+  3600,  // Level 9: 3600-4499 XP
+  4500   // Level 10: 4500+ XP
 ];
 
 export const LEVEL_TITLES = [
@@ -245,32 +265,29 @@ export const MOCK_USER_DATA: User = {
   id: 'mock-user-id',
   username: 'Solo Founder',
   email: 'founder@example.com',
-  xp: 150,
-  streak: 3,
-  longestStreak: 5,
+  xp: 0,
+  streak: 1,
+  longestStreak: 1,
   lastActionDate: new Date().toISOString(),
   momentum: {
-    multiplier: 1.2,
-    lastActionDate: new Date().toISOString()
+    multiplier: 1.0,
+    lastActionDate: new Date().toISOString(),
+    isActive: true,
+    streakDays: 1
   },
-  actions: [
-    {
-      id: 'mock-action-1',
-      actionId: 'code',
-      timestamp: new Date().toISOString(),
-      xp: 10,
-      multiplier: 1.2
-    }
-  ],
+  actions: [],
   achievements: ACHIEVEMENTS.map(a => ({
     ...a,
-    unlocked: a.id === 'FIRST_STEP',
-    date: a.id === 'FIRST_STEP' ? new Date().toISOString() : null
+    unlocked: false,
+    completed: false,
+    progress: 0,
+    target: a.target || 1,
+    date: null
   })),
   stats: {
-    execution: 0,
-    resilience: 0,
-    conviction: 0,
-    influence: 0
+    execution: 10,
+    resilience: 8,
+    conviction: 12,
+    influence: 5
   }
 }; 

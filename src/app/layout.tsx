@@ -4,8 +4,12 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Solo Founder System',
-  description: 'Level up your founder journey with gamified habits and achievements.',
-  viewport: 'width=device-width, initial-scale=1.0',
+  description: 'Level up your founder journey with gamified habits and achievements.'
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
   themeColor: '#000000'
 }
 

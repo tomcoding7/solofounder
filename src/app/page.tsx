@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Action, ACTIONS, MOCK_USER_DATA, User } from '@/types/game';
 import { calculateLevel } from '@/utils/game';
@@ -18,11 +18,13 @@ import { useUserData } from '@/hooks/useUserData';
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
-  const { userData: realUserData, loading, error, updateUserData, recordAction } = useUserData();
+  const { userData: realUserData, loading, error } = useUserData();
   const { playXP, playLevelUp } = useSoundEffects();
+  const [mockUserData, setMockUserData] = useState<User>(MOCK_USER_DATA);
 
   // Use mock data if no real data is available
-  const userData: User = realUserData || MOCK_USER_DATA;
+  const userData: User = realUserData || mockUserData;
+  const currentLevel = calculateLevel(userData.xp);
 
   // Temporarily disable authentication redirect
   /*
@@ -34,37 +36,52 @@ export default function Home() {
   */
 
   const handleAction = async (action: Action) => {
-    // Play sound effects even in mock mode
-    playXP();
-
-    // If we have real user data, record the action
-    if (realUserData?.id) {
-      try {
-        const baseXP = action.xp;
-        const multiplier = realUserData.momentum.multiplier;
-        const success = await recordAction(
-          action.id,
-          baseXP,
-          multiplier,
-          {
-            category: action.category,
-            description: action.description
-          }
-        );
-
-        if (!success) {
-          console.error('Failed to record action');
-        }
-      } catch (err) {
-        console.error('Error handling action:', err);
+    // Always use mock mode for now
+    setMockUserData(prevUser => {
+      const newXP = prevUser.xp + action.xp;
+      const oldLevel = calculateLevel(prevUser.xp);
+      const newLevel = calculateLevel(newXP);
+      
+      // Play level up sound if leveled up
+      if (newLevel > oldLevel) {
+        playLevelUp();
       }
-    } else {
-      // In mock mode, just log the action
-      console.log('Mock action recorded:', {
-        action,
-        mockUser: userData
+
+      // Create updated user data
+      const updatedUser = {
+        ...prevUser,
+        xp: newXP,
+        actions: [
+          ...prevUser.actions,
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            actionId: action.id,
+            timestamp: new Date().toISOString(),
+            xp: action.xp,
+            multiplier: prevUser.momentum.multiplier
+          }
+        ]
+      };
+
+      // Update achievements for level-based achievements
+      const achievements = updatedUser.achievements.map(achievement => {
+        if (achievement.requiredLevel && newLevel >= achievement.requiredLevel) {
+          return {
+            ...achievement,
+            completed: true,
+            unlocked: true,
+            progress: newLevel,
+            date: new Date().toISOString()
+          };
+        }
+        return achievement;
       });
-    }
+
+      return {
+        ...updatedUser,
+        achievements
+      };
+    });
   };
 
   // Show loading state only when we're expecting real user data
@@ -122,7 +139,7 @@ export default function Home() {
 
           <div className="md:col-span-6 space-y-6">
             <XPBar
-              level={calculateLevel(userData.xp)}
+              level={currentLevel}
               xp={userData.xp}
             />
 

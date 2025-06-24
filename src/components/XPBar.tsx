@@ -15,13 +15,16 @@ const XPBar: React.FC<XPBarProps> = ({ xp, level = 1, className = '' }) => {
   const nextThreshold = safeLevel < LEVEL_THRESHOLDS.length 
     ? LEVEL_THRESHOLDS[safeLevel]
     : currentThreshold + 1000;
+  
+  const currentLevelXP = xp - currentThreshold;
+  const nextLevelXP = nextThreshold - currentThreshold;
 
   return (
     <div className={`bg-black/30 backdrop-blur-md rounded-lg p-4 border border-purple-500/30 ${className}`}>
       <div className="flex justify-between items-center mb-2">
         <div className="font-orbitron text-xl text-purple-300">Level {safeLevel}</div>
         <div className="text-gray-300">
-          {xp - currentThreshold} / {nextThreshold - currentThreshold} XP
+          {currentLevelXP} / {nextLevelXP} XP
         </div>
       </div>
       <div className="h-4 bg-black/50 rounded-full overflow-hidden">
