@@ -1,27 +1,16 @@
-import { useCallback } from 'react';
-import useSound from 'use-sound';
-import { SOUND_EFFECTS } from '@/utils/sounds';
+import { useEffect } from 'react';
+import { playSoundEffect, preloadSoundEffects } from '@/utils/sounds';
 
-export const useSoundEffects = () => {
-  const [playXP] = useSound(SOUND_EFFECTS.xp, { volume: 0.5 });
-  const [playLevelUp] = useSound(SOUND_EFFECTS.levelup, { volume: 0.5 });
-  const [playClick] = useSound(SOUND_EFFECTS.click, { volume: 0.3 });
-  const [playQuest] = useSound(SOUND_EFFECTS.quest, { volume: 0.5 });
-
-  const playActionSound = useCallback(() => {
-    playXP();
-    playClick();
-  }, [playXP, playClick]);
-
-  const playLevelUpSound = useCallback(() => {
-    playLevelUp();
-    playQuest();
-  }, [playLevelUp, playQuest]);
+export function useSoundEffects() {
+  useEffect(() => {
+    // Preload all sound effects when the component mounts
+    preloadSoundEffects();
+  }, []);
 
   return {
-    playActionSound,
-    playLevelUpSound,
-    playClick,
-    playQuest,
+    playXP: () => playSoundEffect('xp'),
+    playLevelUp: () => playSoundEffect('levelup'),
+    playClick: () => playSoundEffect('click'),
+    playQuest: () => playSoundEffect('quest'),
   };
-}; 
+} 

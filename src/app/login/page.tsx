@@ -1,22 +1,50 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { useAuth } from '@/contexts/AuthContext';
+import { Provider } from '@supabase/supabase-js';
 
 export default function Login() {
   const router = useRouter();
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string>('');
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    // Set the redirect URL based on the environment
+    const host = window.location.origin;
+    setRedirectUrl(`${host}/auth/callback`);
+  }, []);
 
   useEffect(() => {
     if (user) {
       router.push('/');
+    } else {
+      // If we know there's no user, we can show the login form
+      setIsLoading(false);
     }
   }, [user, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center">
+        <div className="text-purple-300 text-xl animate-pulse">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 flex items-center justify-center p-4">
@@ -35,27 +63,36 @@ export default function Login() {
             </p>
           </div>
 
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#9333ea',
-                    brandAccent: '#a855f7',
+          {error ? (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+              <p className="text-red-400">{error}</p>
+            </div>
+          ) : (
+            <Auth
+              supabaseClient={supabase}
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: '#9333ea',
+                      brandAccent: '#a855f7',
+                    },
                   },
                 },
-              },
-              className: {
-                container: 'supabase-auth-container',
-                button: 'supabase-auth-button',
-                input: 'supabase-auth-input',
-              },
-            }}
-            providers={['google']}
-            theme="dark"
-          />
+                className: {
+                  container: 'supabase-auth-container',
+                  button: 'supabase-auth-button',
+                  input: 'supabase-auth-input',
+                },
+              }}
+              providers={['google']}
+              view="magic_link"
+              showLinks={true}
+              redirectTo={redirectUrl}
+              theme="dark"
+            />
+          )}
         </div>
       </motion.div>
     </main>
