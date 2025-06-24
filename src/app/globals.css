@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
-
 :root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 88, 28, 135;
   --deep-space: 2, 6, 23;
   --neon-blue: 80, 200, 255;
   --neon-purple: 147, 51, 234;
@@ -13,11 +15,14 @@
 }
 
 body {
-  background: radial-gradient(circle at 50% 0%, rgb(13, 25, 48) 0%, rgb(var(--deep-space)) 100%);
-  color: rgb(var(--neon-blue));
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom right,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
   min-height: 100vh;
-  overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .font-orbitron {
@@ -136,4 +141,24 @@ body {
   right: 0;
   border-bottom: 2px solid;
   border-right: 2px solid;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
 } 

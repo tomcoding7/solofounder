@@ -1,46 +1,51 @@
-import { motion } from 'framer-motion';
+import React from 'react';
 import { Action } from '@/types/game';
 
 interface ActionButtonProps {
   action: Action;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-export default function ActionButton({ action, onClick }: ActionButtonProps) {
+const ActionButton: React.FC<ActionButtonProps> = ({ action, onClick, disabled = false }) => {
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      className="action-button w-full h-32 relative group overflow-hidden"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      disabled={disabled}
+      className={`
+        relative w-full p-4 rounded-lg border transform
+        ${disabled 
+          ? 'bg-black/20 border-gray-700/30 cursor-not-allowed' 
+          : 'bg-black/30 border-purple-500/30 hover:border-purple-500/60 hover:bg-purple-900/20 hover:scale-[1.02] active:scale-[0.98]'
+        }
+        backdrop-blur-md transition-all duration-300
+      `}
     >
-      {/* Background glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[rgba(var(--neon-blue),0.1)] to-[rgba(var(--neon-purple),0.1)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
+      {/* Corner Accents */}
+      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-purple-500/30" />
+      <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-purple-500/30" />
+      <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-purple-500/30" />
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-purple-500/30" />
+
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center">
-        <div className="text-3xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
-          {action.icon}
-        </div>
-        <div className="console-text font-semibold tracking-wider text-lg mb-1">
-          {action.name.toUpperCase()}
-        </div>
-        <div className="console-text text-sm opacity-70">
-          +{action.xp} XP
+      <div className="flex flex-col items-center space-y-2">
+        <span className="text-2xl">{action.icon}</span>
+        <div className="text-center">
+          <div className={`font-medium ${disabled ? 'text-gray-400' : 'text-purple-300'}`}>
+            {action.name}
+          </div>
+          <div className="text-sm text-gray-400">+{action.xp} XP</div>
         </div>
       </div>
 
-      {/* Border glow */}
-      <div className="absolute inset-0 border border-[rgba(var(--neon-blue),0.2)] rounded-lg" />
-      
-      {/* Hover border effect */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[rgba(var(--neon-blue),0.5)] to-[rgba(var(--neon-purple),0.5)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-      
-      {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[rgba(var(--neon-blue),0.3)]" />
-      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[rgba(var(--neon-blue),0.3)]" />
-      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[rgba(var(--neon-blue),0.3)]" />
-      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[rgba(var(--neon-blue),0.3)]" />
-    </motion.button>
+      {/* Cooldown Indicator */}
+      {action.cooldown && (
+        <div className="absolute bottom-1 right-1 text-xs text-gray-400">
+          ⏱️ {action.cooldown}m
+        </div>
+      )}
+    </button>
   );
-} 
+};
+
+export default ActionButton; 

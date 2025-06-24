@@ -1,22 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, ACTIONS } from '@/types/game';
-import { getDefaultUser, updateStreak, calculateLevel } from '@/utils/game';
+import { User, Action, ACTIONS } from '@/types/game';
+import { getDefaultUser, calculateLevel, updateStreak, updateMomentum, checkAchievements, calculateActionXP } from '@/utils/game';
 import XPBar from '@/components/XPBar';
-import ActionButton from '@/components/ActionButton';
-import Streak from '@/components/Streak';
 import FounderStats from '@/components/FounderStats';
-import QuestLog from '@/components/QuestLog';
-import StartupScreen from '@/components/StartupScreen';
+import ActionButton from '@/components/ActionButton';
+import Achievements from '@/components/Achievements';
+import Momentum from '@/components/Momentum';
+import Assistant from '@/components/Assistant';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 export default function Home() {
   const [user, setUser] = useState<User>(getDefaultUser());
-  const [showLevelUp, setShowLevelUp] = useState(false);
-  const [isStarting, setIsStarting] = useState(true);
-  const { playXP, playLevelUp, playClick, playQuest } = useSoundEffects();
+  const { playActionSound, playLevelUpSound } = useSoundEffects();
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -25,145 +22,111 @@ export default function Home() {
     }
   }, []);
 
-  const handleAction = (actionId: string) => {
-    playClick();
-    const action = ACTIONS.find(a => a.id === actionId);
-    if (!action) return;
+  useEffect(() => {
+    localStorage.setItem('user', JSON.stringify(user));
+  }, [user]);
 
-    const newUser = {
+  const isActionOnCooldown = (action: Action): boolean => {
+    if (!action.cooldown) return false;
+
+    const lastAction = user.actions
+      .filter(a => a.actionId === action.id)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+
+    if (!lastAction) return false;
+
+    const now = new Date();
+    const timeSinceLastAction = now.getTime() - new Date(lastAction.timestamp).getTime();
+    const cooldownMs = action.cooldown * 60 * 1000;
+
+    return timeSinceLastAction < cooldownMs;
+  };
+
+  const handleAction = (action: Action) => {
+    const now = new Date();
+    
+    // Check cooldown
+    if (isActionOnCooldown(action)) {
+      return;
+    }
+
+    // Calculate XP with all multipliers
+    const earnedXP = calculateActionXP(action, user);
+    
+    // Update user state
+    const updatedUser = {
       ...user,
-      xp: user.xp + action.xp,
+      xp: user.xp + earnedXP,
       actions: [
         ...user.actions,
         {
-          id: Math.random().toString(36).substr(2, 9),
+          id: crypto.randomUUID(),
           actionId: action.id,
-          timestamp: new Date().toISOString(),
-          xp: action.xp,
+          timestamp: now.toISOString(),
+          xp: earnedXP,
+          multiplier: user.momentum.multiplier,
         },
       ],
     };
 
-    const oldLevel = calculateLevel(user.xp);
-    const newLevel = calculateLevel(newUser.xp);
+    // Update streak and momentum
+    const userWithStreak = updateStreak(updatedUser);
+    const userWithMomentum = updateMomentum(userWithStreak);
+    
+    // Check achievements
+    const finalUser = checkAchievements(userWithMomentum);
 
+    // Check for level up
+    const oldLevel = calculateLevel(user.xp);
+    const newLevel = calculateLevel(finalUser.xp);
+    
     if (newLevel > oldLevel) {
-      setShowLevelUp(true);
-      playLevelUp();
-      setTimeout(() => setShowLevelUp(false), 3000);
+      playLevelUpSound();
     } else {
-      playXP();
+      playActionSound();
     }
 
-    const updatedUser = updateStreak(newUser);
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(finalUser);
   };
 
-  if (isStarting) {
-    return <StartupScreen onComplete={() => setIsStarting(false)} />;
-  }
-
   return (
-    <main className="min-h-screen bg-[rgb(var(--deep-space))] flex items-center justify-center p-4">
-      <div className="w-full max-w-[1000px] mx-auto">
-        {/* Main Console Panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="console-panel p-8 relative overflow-hidden"
-        >
-          {/* Level and XP Section */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="console-text text-2xl font-orbitron">
-              Lv. {calculateLevel(user.xp)}
-            </div>
-            <div className="flex-1">
-              <XPBar xp={user.xp} level={calculateLevel(user.xp)} />
-            </div>
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Left Column */}
+          <div className="md:col-span-3 space-y-6">
+            <FounderStats user={user} />
+            <Momentum momentum={user.momentum} />
           </div>
 
-          {/* Class Title */}
-          <div className="text-center mb-8">
-            <div className="console-text text-lg font-orbitron tracking-wider">
-              FOUNDER / {user?.class?.toUpperCase() || 'INDIE HACKER'}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <ActionButton
-              action={ACTIONS.find(a => a.id === 'post') || ACTIONS[0]}
-              onClick={() => handleAction('post')}
+          {/* Center Column */}
+          <div className="md:col-span-6 space-y-6">
+            <XPBar
+              level={calculateLevel(user.xp)}
+              xp={user.xp}
             />
-            <ActionButton
-              action={ACTIONS.find(a => a.id === 'ship') || ACTIONS[0]}
-              onClick={() => handleAction('ship')}
-            />
-            <ActionButton
-              action={ACTIONS.find(a => a.id === 'dm') || ACTIONS[0]}
-              onClick={() => handleAction('dm')}
-            />
-          </div>
 
-          {/* Stats and Logs Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Stats Panel */}
-            <div className="console-panel p-4">
-              <FounderStats user={user} />
-            </div>
-
-            {/* XP Stats */}
-            <div className="console-panel p-4">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="console-text opacity-80">XP</span>
-                  <span className="console-text text-xl">↑ {user.xp}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="console-text opacity-80">STREAK</span>
-                  <span className="console-text text-xl">🔥 {user.streak}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="console-text opacity-80">CASH EARNED</span>
-                  <span className="console-text text-xl">£{user.xp * 2}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="console-text opacity-80">REJECTIONS</span>
-                  <span className="console-text text-xl">{user.actions.filter(a => a.actionId === 'reject').length}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quest Log */}
-            <div className="console-panel p-4">
-              <QuestLog user={user} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ACTIONS.map((action) => (
+                <ActionButton
+                  key={action.id}
+                  action={action}
+                  onClick={() => handleAction(action)}
+                  disabled={isActionOnCooldown(action)}
+                />
+              ))}
             </div>
           </div>
-        </motion.div>
 
-        {/* System Messages */}
-        <AnimatePresence>
-          {showLevelUp && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed bottom-4 right-4 console-panel p-4"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">💎</span>
-                <div>
-                  <div className="console-text font-bold">LEVEL UP!</div>
-                  <div className="console-text text-sm opacity-80">
-                    +20 XP - Completed
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Right Column */}
+          <div className="md:col-span-3 space-y-6">
+            <Achievements achievements={user.achievements} />
+          </div>
+        </div>
       </div>
+
+      {/* Fixed Assistant */}
+      <Assistant user={user} />
     </main>
   );
 } 

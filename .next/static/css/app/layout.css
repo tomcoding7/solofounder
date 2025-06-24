@@ -1,13 +1,15 @@
 /*!*****************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/app/globals.css ***!
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[11].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[11].oneOf[12].use[3]!./src/app/globals.css ***!
   \*****************************************************************************************************************************************************************************************************************************************************************/
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
-
 :root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 88, 28, 135;
   --deep-space: 2, 6, 23;
   --neon-blue: 80, 200, 255;
   --neon-purple: 147, 51, 234;
@@ -16,11 +18,14 @@
 }
 
 body {
-  background: radial-gradient(circle at 50% 0%, rgb(13, 25, 48) 0%, rgb(var(--deep-space)) 100%);
-  color: rgb(var(--neon-blue));
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom right,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
   min-height: 100vh;
-  overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .font-orbitron {
@@ -140,13 +145,33 @@ body {
   right: 0;
   border-bottom: 2px solid;
   border-right: 2px solid;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
 } 
 /*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[13].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"src\\app\\layout.tsx","import":"Inter","arguments":[{"subsets":["latin"]}],"variableName":"inter"} ***!
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[11].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[11].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"src\\app\\layout.tsx","import":"Inter","arguments":[{"subsets":["latin"]}],"variableName":"inter"} ***!
   \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /* cyrillic-ext */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -155,7 +180,7 @@ body {
 }
 /* cyrillic */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -164,7 +189,7 @@ body {
 }
 /* greek-ext */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -173,7 +198,7 @@ body {
 }
 /* greek */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -182,7 +207,7 @@ body {
 }
 /* vietnamese */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -191,7 +216,7 @@ body {
 }
 /* latin-ext */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -200,13 +225,13 @@ body {
 }
 /* latin */
 @font-face {
-  font-family: 'Inter';
+  font-family: '__Inter_e8ce0c';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
   src: url(/_next/static/media/e4af272ccee01ff0-s.p.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}@font-face {font-family: 'Inter Fallback';src: local("Arial");ascent-override: 90.44%;descent-override: 22.52%;line-gap-override: 0.00%;size-adjust: 107.12%
-}.__className_e8ce0c {font-family: 'Inter', 'Inter Fallback';font-style: normal
+}@font-face {font-family: '__Inter_Fallback_e8ce0c';src: local("Arial");ascent-override: 90.20%;descent-override: 22.48%;line-gap-override: 0.00%;size-adjust: 107.40%
+}.__className_e8ce0c {font-family: '__Inter_e8ce0c', '__Inter_Fallback_e8ce0c';font-style: normal
 }
 

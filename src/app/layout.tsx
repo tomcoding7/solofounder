@@ -5,15 +5,17 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Founder Quest',
-  description: 'Level up your entrepreneurship journey',
+  title: 'Solo Founder System',
+  description: 'Level up your founder journey with gamified habits and achievements.',
+  viewport: 'width=device-width, initial-scale=1.0',
+  themeColor: '#000000',
 }
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
       <body className={inter.className}>{children}</body>
