@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS public.users (
     username TEXT,
     email TEXT,
     xp INTEGER DEFAULT 0,
-    level INTEGER DEFAULT 1,
-    stats JSONB DEFAULT '{}'::jsonb,
-    momentum INTEGER DEFAULT 0,
-    achievements JSONB DEFAULT '[]'::jsonb,
-    quest_progress JSONB DEFAULT '{}'::jsonb,
-    streak_data JSONB DEFAULT '{"current": 0, "longest": 0, "lastCheckin": null}'::jsonb
+    streak INTEGER DEFAULT 0,
+    longest_streak INTEGER DEFAULT 0,
+    last_action_date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    momentum JSONB DEFAULT '{"multiplier": 1.0, "lastActionDate": null}'::jsonb,
+    actions JSONB DEFAULT '[]'::jsonb,
+    achievements JSONB DEFAULT '[]'::jsonb
 );
 
 -- Set up Row Level Security (RLS)
@@ -37,8 +37,12 @@ CREATE POLICY "Users can insert own profile"
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.users (id, email)
-    VALUES (new.id, new.email)
+    INSERT INTO public.users (id, email, username)
+    VALUES (
+        new.id, 
+        new.email,
+        COALESCE(SPLIT_PART(new.email, '@', 1), 'Anonymous Founder')
+    )
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;

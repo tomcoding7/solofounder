@@ -1,40 +1,49 @@
 export interface Action {
   id: string;
   name: string;
+  description: string;
   xp: number;
-  icon: string;
-  description?: string;
   cooldown?: number; // in minutes
+  icon?: string;
+  category?: string;
+}
+
+export interface ActionRecord {
+  id: string;
+  actionId: string;
+  timestamp: string;
+  xp: number;
+  multiplier: number;
 }
 
 export interface User {
+  id: string;
+  username: string;
+  email: string;
   xp: number;
-  level: number;
-  actions: CompletedAction[];
   streak: number;
-  lastActionDate: string | null;
-  class: FounderClass;
-  stats: FounderStats;
+  longestStreak: number;
+  lastActionDate: string;
   momentum: Momentum;
+  actions: ActionRecord[];
   achievements: Achievement[];
-  questProgress: QuestProgress;
 }
 
 export interface Momentum {
   multiplier: number;
-  lastActionTimestamp: string | null;
-  isActive: boolean;
-  streakDays: number;
+  lastActionDate: string;
 }
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
-  progress: number;
-  target: number;
-  completed: boolean;
-  timestamp?: string;
+  unlocked: boolean;
+  date: string | null;
+  icon?: string;
+  requiredLevel?: number;
+  requiredActions?: string[];
+  requiredStreak?: number;
 }
 
 export interface QuestProgress {
@@ -73,42 +82,104 @@ export interface FounderStats {
 export type FounderClass = 'Indie Hacker' | 'AI Builder' | 'Content Creator' | 'Community Leader';
 
 export const ACTIONS: Action[] = [
-  { id: 'post', name: 'Post Content', xp: 10, icon: '📝', description: 'Share valuable content online' },
-  { id: 'dm', name: 'Cold DM/Email', xp: 20, icon: '💬', description: 'Reach out for collaboration' },
-  { id: 'approach', name: 'Cold Approach IRL', xp: 30, icon: '🤝', description: 'Network in person' },
-  { id: 'reject', name: 'Get Rejected', xp: 15, icon: '🎯', description: 'Learn from rejection' },
-  { id: 'ship', name: 'Ship MVP', xp: 100, icon: '🚀', description: 'Launch a product/feature', cooldown: 180 },
-  { id: 'fail', name: 'Fail & Reflect', xp: 25, icon: '🔄', description: 'Learn from mistakes' },
-  { id: 'gym', name: 'Go to Gym', xp: 15, icon: '💪', description: 'Stay healthy', cooldown: 720 },
-  { id: 'help', name: 'Make Someone\'s Day', xp: 20, icon: '🌟', description: 'Help others succeed' },
-  { id: 'quest', name: 'Complete Quest', xp: 50, icon: '✨', description: 'Finish daily challenge' },
+  {
+    id: 'code',
+    name: 'Write Code',
+    description: 'Write some code for your project',
+    xp: 10,
+    cooldown: 5,
+    icon: '💻',
+    category: 'development'
+  },
+  {
+    id: 'learn',
+    name: 'Learn',
+    description: 'Study something new',
+    xp: 15,
+    cooldown: 10,
+    icon: '📚',
+    category: 'growth'
+  },
+  {
+    id: 'plan',
+    name: 'Plan',
+    description: 'Plan your next steps',
+    xp: 5,
+    icon: '📝',
+    category: 'strategy'
+  },
+  {
+    id: 'network',
+    name: 'Network',
+    description: 'Connect with other founders',
+    xp: 20,
+    cooldown: 30,
+    icon: '🤝',
+    category: 'social'
+  },
+  {
+    id: 'ship',
+    name: 'Ship Feature',
+    description: 'Deploy a new feature',
+    xp: 50,
+    icon: '🚀',
+    category: 'development'
+  },
+  {
+    id: 'customer',
+    name: 'Customer Interview',
+    description: 'Talk to a potential customer',
+    xp: 30,
+    icon: '👥',
+    category: 'business'
+  }
 ];
 
-export const ACHIEVEMENTS = [
+export const ACHIEVEMENTS: Achievement[] = [
   {
-    id: 'rejection_proof',
-    name: 'Rejection-Proof',
-    description: 'Get rejected 10 times in a week',
-    target: 10,
+    id: 'FIRST_STEP',
+    name: 'First Step',
+    description: 'Complete your first action',
+    unlocked: false,
+    date: null,
+    icon: '👣'
   },
   {
-    id: 'speed_demon',
-    name: 'Speed Demon',
-    description: 'Ship MVP in under 3 hours',
-    target: 1,
+    id: 'CONSISTENCY_I',
+    name: 'Consistency I',
+    description: 'Maintain a 3-day streak',
+    unlocked: false,
+    date: null,
+    icon: '🔥',
+    requiredStreak: 3
   },
   {
-    id: 'social_hacker',
-    name: 'Social Hacker',
-    description: 'Cold-approach 5 people in a day',
-    target: 5,
+    id: 'CONSISTENCY_II',
+    name: 'Consistency II',
+    description: 'Maintain a 7-day streak',
+    unlocked: false,
+    date: null,
+    icon: '🔥🔥',
+    requiredStreak: 7
   },
   {
-    id: 'momentum_beast',
-    name: 'Momentum Beast',
-    description: 'Maintain a 30-day streak',
-    target: 30,
+    id: 'LEVEL_5',
+    name: 'Getting Started',
+    description: 'Reach level 5',
+    unlocked: false,
+    date: null,
+    icon: '⭐',
+    requiredLevel: 5
   },
+  {
+    id: 'LEVEL_10',
+    name: 'Rising Star',
+    description: 'Reach level 10',
+    unlocked: false,
+    date: null,
+    icon: '⭐⭐',
+    requiredLevel: 10
+  }
 ];
 
 export const LEVEL_THRESHOLDS = [
@@ -166,4 +237,33 @@ export const FOUNDER_CLASSES: Record<FounderClass, { description: string; bonuse
       'Conviction stat growth +15%',
     ],
   },
+};
+
+// Mock data for development
+export const MOCK_USER_DATA: User = {
+  id: 'mock-user-id',
+  username: 'Solo Founder',
+  email: 'founder@example.com',
+  xp: 150,
+  streak: 3,
+  longestStreak: 5,
+  lastActionDate: new Date().toISOString(),
+  momentum: {
+    multiplier: 1.2,
+    lastActionDate: new Date().toISOString()
+  },
+  actions: [
+    {
+      id: 'mock-action-1',
+      actionId: 'code',
+      timestamp: new Date().toISOString(),
+      xp: 10,
+      multiplier: 1.2
+    }
+  ],
+  achievements: ACHIEVEMENTS.map(a => ({
+    ...a,
+    unlocked: a.id === 'FIRST_STEP',
+    date: a.id === 'FIRST_STEP' ? new Date().toISOString() : null
+  }))
 }; 

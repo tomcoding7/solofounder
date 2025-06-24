@@ -1,9 +1,21 @@
-// Sound effect URLs from Pixabay (free for commercial use)
+// TODO: Download these sound effects from Pixabay and place them in the /public/sounds/ directory:
+// - /sounds/collect-coin.mp3 (from https://cdn.pixabay.com/audio/2022/10/16/audio_12b5e8e5a2.mp3)
+// - /sounds/level-up.mp3 (from https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c8e2e.mp3)
+
+// IMPORTANT: Sound files must exist in the /public/sounds/ directory and be valid, non-empty MP3 files.
+// Required files:
+// - /public/sounds/coin-recieved-230517.mp3 (for XP gain)
+// - /public/sounds/orchestral-win-331233.mp3 (for level up)
+// - /public/sounds/success-1-6297.mp3 (for button clicks)
+// - /public/sounds/cute-level-up-2-189851.mp3 (for quest completion)
+// If any of these files are missing or empty, you will see 416 Range Not Satisfiable errors.
+
+// Sound effect paths (using local files in public directory)
 export const SOUND_EFFECTS = {
-  xp: 'https://cdn.pixabay.com/audio/2022/10/16/audio_12b5e8e5a2.mp3',         // "Collect Coin" (XP gain)
-  levelup: 'https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c8e2e.mp3',    // "Level Up"
-  click: 'https://cdn.pixabay.com/audio/2022/10/16/audio_12b5e8e5a2.mp3',      // "Button Click"
-  quest: 'https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c8e2e.mp3',      // "Quest Complete"
+  xp: '/sounds/coin-recieved-230517.mp3',      // Small reward sound (XP gain)
+  levelup: '/sounds/orchestral-win-331233.mp3', // Major achievement (level up)
+  click: '/sounds/success-1-6297.mp3',         // Button click feedback
+  quest: '/sounds/cute-level-up-2-189851.mp3', // Quest completion
 };
 
 // Preload sound effects for better performance
