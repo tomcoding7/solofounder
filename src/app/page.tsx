@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Action, ACTIONS, MOCK_USER_DATA, User } from '@/types/game';
+import { Action, ACTIONS, MOCK_USER_DATA, User, LEVEL_THRESHOLDS } from '@/types/game';
 import { calculateLevel } from '@/utils/game';
 import XPBar from '@/components/XPBar';
 import FounderStats from '@/components/FounderStats';
@@ -26,37 +26,51 @@ export default function Home() {
   const userData: User = realUserData || mockUserData;
   const currentLevel = calculateLevel(userData.xp);
 
-  // Temporarily disable authentication redirect
-  /*
+  // Debug logs
   useEffect(() => {
-    if (!user && !loading) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
-  */
+    console.log('Current XP:', userData.xp);
+    console.log('Current Level:', currentLevel);
+    console.log('Level Thresholds:', LEVEL_THRESHOLDS);
+  }, [userData.xp, currentLevel]);
 
   const handleAction = async (action: Action) => {
-    // Always use mock mode for now
     setMockUserData(prevUser => {
       const newXP = prevUser.xp + action.xp;
       const oldLevel = calculateLevel(prevUser.xp);
       const newLevel = calculateLevel(newXP);
       
+      // Debug logs
+      console.log('Action XP:', action.xp);
+      console.log('Old XP:', prevUser.xp);
+      console.log('New XP:', newXP);
+      console.log('Old Level:', oldLevel);
+      console.log('New Level:', newLevel);
+      console.log('Level Thresholds:', LEVEL_THRESHOLDS);
+      
       // Play level up sound if leveled up
       if (newLevel > oldLevel) {
         playLevelUp();
+        console.log('Level Up!', oldLevel, '->', newLevel);
       }
 
-      // Create updated user data
+      // Create updated user data with proper timestamps
+      const now = new Date().toISOString();
       const updatedUser = {
         ...prevUser,
         xp: newXP,
+        level: newLevel,
+        lastActionDate: now,
+        momentum: {
+          ...prevUser.momentum,
+          lastActionDate: now,
+          lastActionTimestamp: now
+        },
         actions: [
           ...prevUser.actions,
           {
             id: Math.random().toString(36).substr(2, 9),
             actionId: action.id,
-            timestamp: new Date().toISOString(),
+            timestamp: now,
             xp: action.xp,
             multiplier: prevUser.momentum.multiplier
           }
@@ -71,16 +85,25 @@ export default function Home() {
             completed: true,
             unlocked: true,
             progress: newLevel,
-            date: new Date().toISOString()
+            date: now
           };
         }
         return achievement;
       });
 
-      return {
+      const finalUser = {
         ...updatedUser,
         achievements
       };
+
+      // Debug log final state
+      console.log('Updated User:', finalUser);
+      console.log('New Level Check:', calculateLevel(finalUser.xp));
+      
+      // Play XP sound
+      playXP();
+      
+      return finalUser;
     });
   };
 
@@ -119,9 +142,14 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-orbitron text-purple-300">
-            {userData.username || 'Solo Founder'}
-          </h1>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-orbitron text-purple-300">
+              {userData.username || 'Solo Founder'}
+            </h1>
+            <div className="text-sm text-purple-400">
+              Level {currentLevel} • {userData.xp} XP
+            </div>
+          </div>
           <button
             onClick={() => router.push('/login')}
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
@@ -141,6 +169,7 @@ export default function Home() {
             <XPBar
               level={currentLevel}
               xp={userData.xp}
+              className="animate-pulse-on-update"
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -149,7 +178,7 @@ export default function Home() {
                   key={action.id}
                   action={action}
                   onClick={() => handleAction(action)}
-                  disabled={false} // Disable cooldowns in mock mode
+                  disabled={false}
                 />
               ))}
             </div>

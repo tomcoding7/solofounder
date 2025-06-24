@@ -1,8 +1,10 @@
 import { User, LEVEL_THRESHOLDS, LEVEL_TITLES, FounderClass, FOUNDER_CLASSES, Action, ACHIEVEMENTS } from '@/types/game';
 
-export { LEVEL_THRESHOLDS } from '@/types/game';
-
-export const calculateLevel = (xp: number): number => {
+export function calculateLevel(xp: number): number {
+  // Debug log
+  console.log('Calculating level for XP:', xp);
+  console.log('Level thresholds:', LEVEL_THRESHOLDS);
+  
   let level = 1;
   for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
     if (xp >= LEVEL_THRESHOLDS[i]) {
@@ -11,16 +13,35 @@ export const calculateLevel = (xp: number): number => {
       break;
     }
   }
+  
+  // Debug log
+  console.log('Calculated level:', level);
   return level;
-};
+}
 
-export const calculateProgress = (xp: number): number => {
-  const level = calculateLevel(xp);
-  const currentThreshold = LEVEL_THRESHOLDS[level - 1] || 0;
-  const nextThreshold = LEVEL_THRESHOLDS[level] || LEVEL_THRESHOLDS[level - 1] + 1000;
-  const progress = ((xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+export function getXPForNextLevel(currentXP: number): number {
+  const currentLevel = calculateLevel(currentXP);
+  if (currentLevel >= LEVEL_THRESHOLDS.length) {
+    return LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
+  }
+  return LEVEL_THRESHOLDS[currentLevel];
+}
+
+export function calculateProgress(currentXP: number): number {
+  const currentLevel = calculateLevel(currentXP);
+  const currentLevelThreshold = LEVEL_THRESHOLDS[currentLevel - 1];
+  const nextLevelThreshold = LEVEL_THRESHOLDS[currentLevel];
+  
+  if (!nextLevelThreshold) {
+    return 100; // Max level reached
+  }
+  
+  const xpInCurrentLevel = currentXP - currentLevelThreshold;
+  const xpRequiredForNextLevel = nextLevelThreshold - currentLevelThreshold;
+  const progress = (xpInCurrentLevel / xpRequiredForNextLevel) * 100;
+  
   return Math.min(Math.max(progress, 0), 100);
-};
+}
 
 export const getLevelTitle = (level: number): string => {
   return LEVEL_TITLES[level - 1] || LEVEL_TITLES[LEVEL_TITLES.length - 1];
@@ -189,32 +210,27 @@ export const updateStats = (user: User, actionId: string): User => {
 };
 
 export const getDefaultUser = (): User => ({
+  id: 'new-user',
+  username: 'New User',
+  email: '',
   xp: 0,
-  level: 1,
-  actions: [],
   streak: 0,
-  lastActionDate: null,
-  class: 'Indie Hacker',
+  longestStreak: 0,
+  lastActionDate: new Date().toISOString(),
+  momentum: {
+    multiplier: 1.0,
+    lastActionDate: new Date().toISOString(),
+    lastActionTimestamp: new Date().toISOString(),
+    isActive: false,
+    streakDays: 0
+  },
+  actions: [],
+  achievements: [],
   stats: {
     execution: 1,
     resilience: 1,
     conviction: 1,
-    influence: 1,
+    influence: 1
   },
-  momentum: {
-    multiplier: 1,
-    lastActionTimestamp: null,
-    isActive: false,
-    streakDays: 0,
-  },
-  achievements: ACHIEVEMENTS.map(a => ({
-    ...a,
-    progress: 0,
-    completed: false,
-  })),
-  questProgress: {
-    dailyQuestsCompleted: 0,
-    weeklyQuestsCompleted: 0,
-    currentQuests: [],
-  },
+  class: 'Indie Hacker'
 }); 

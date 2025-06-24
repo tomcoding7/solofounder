@@ -2,9 +2,9 @@ export interface Action {
   id: string;
   name: string;
   description: string;
+  icon: string;
   xp: number;
-  cooldown?: number; // in minutes
-  icon?: string;
+  cooldown?: number;
   category?: string;
 }
 
@@ -19,37 +19,33 @@ export interface ActionRecord {
 export interface User {
   id: string;
   username: string;
-  email: string;
   xp: number;
-  streak: number;
-  longestStreak: number;
-  lastActionDate: string;
-  momentum: Momentum;
-  actions: ActionRecord[];
+  level: number;
+  stats: Stats;
   achievements: Achievement[];
-  stats: FounderStats;
+  actions: CompletedAction[];
+  momentum: Momentum;
+  lastActionDate: string;
 }
 
 export interface Momentum {
+  streak: number;
   multiplier: number;
   lastActionDate: string;
-  isActive: boolean;
-  streakDays: number;
+  lastActionTimestamp: string;
 }
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
-  unlocked: boolean;
+  icon: string;
   completed: boolean;
-  progress: number;
-  target: number;
-  date: string | null;
-  icon?: string;
+  unlocked: boolean;
+  progress?: number;
+  target?: number;
   requiredLevel?: number;
-  requiredActions?: string[];
-  requiredStreak?: number;
+  date?: string;
 }
 
 export interface QuestProgress {
@@ -75,14 +71,14 @@ export interface CompletedAction {
   actionId: string;
   timestamp: string;
   xp: number;
-  multiplier?: number;
+  multiplier: number;
 }
 
-export interface FounderStats {
-  execution: number;
-  resilience: number;
-  conviction: number;
-  influence: number;
+export interface Stats {
+  strength: number;
+  intelligence: number;
+  dexterity: number;
+  charisma: number;
 }
 
 export type FounderClass = 'Indie Hacker' | 'AI Builder' | 'Content Creator' | 'Community Leader';
@@ -91,115 +87,81 @@ export const ACTIONS: Action[] = [
   {
     id: 'code',
     name: 'Write Code',
-    description: 'Write some code for your project',
-    xp: 10,
-    cooldown: 5,
+    description: 'Write some code or fix a bug',
     icon: '💻',
-    category: 'development'
+    xp: 20,
+    category: 'Development'
+  },
+  {
+    id: 'design',
+    name: 'Design',
+    description: 'Work on UI/UX design',
+    icon: '🎨',
+    xp: 15,
+    category: 'Design'
   },
   {
     id: 'learn',
     name: 'Learn',
-    description: 'Study something new',
-    xp: 15,
-    cooldown: 10,
+    description: 'Study a new technology or concept',
     icon: '📚',
-    category: 'growth'
+    xp: 10,
+    category: 'Learning'
   },
   {
     id: 'plan',
     name: 'Plan',
-    description: 'Plan your next steps',
-    xp: 5,
+    description: 'Plan features or architecture',
     icon: '📝',
-    category: 'strategy'
+    xp: 10,
+    category: 'Planning'
   },
   {
-    id: 'network',
-    name: 'Network',
-    description: 'Connect with other founders',
-    xp: 20,
-    cooldown: 30,
-    icon: '🤝',
-    category: 'social'
+    id: 'test',
+    name: 'Test',
+    description: 'Write or run tests',
+    icon: '🧪',
+    xp: 15,
+    category: 'Testing'
   },
   {
-    id: 'ship',
-    name: 'Ship Feature',
-    description: 'Deploy a new feature',
-    xp: 50,
+    id: 'deploy',
+    name: 'Deploy',
+    description: 'Deploy code to production',
     icon: '🚀',
-    category: 'development'
-  },
-  {
-    id: 'customer',
-    name: 'Customer Interview',
-    description: 'Talk to a potential customer',
-    xp: 30,
-    icon: '👥',
-    category: 'business'
+    xp: 25,
+    category: 'Operations'
   }
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
   {
-    id: 'FIRST_STEP',
+    id: 'first-action',
     name: 'First Step',
-    description: 'Complete your first action',
-    unlocked: false,
+    description: 'Complete your first founder action',
+    icon: '🎯',
     completed: false,
+    unlocked: false,
     progress: 0,
-    target: 1,
-    date: null,
-    icon: '👣'
+    target: 1
   },
   {
-    id: 'CONSISTENCY_I',
-    name: 'Consistency I',
-    description: 'Maintain a 3-day streak',
-    unlocked: false,
-    completed: false,
-    progress: 0,
-    target: 3,
-    date: null,
-    icon: '🔥',
-    requiredStreak: 3
-  },
-  {
-    id: 'CONSISTENCY_II',
-    name: 'Consistency II',
-    description: 'Maintain a 7-day streak',
-    unlocked: false,
-    completed: false,
-    progress: 0,
-    target: 7,
-    date: null,
-    icon: '🔥🔥',
-    requiredStreak: 7
-  },
-  {
-    id: 'LEVEL_5',
-    name: 'Getting Started',
-    description: 'Reach level 5',
-    unlocked: false,
-    completed: false,
-    progress: 1,
-    target: 5,
-    date: null,
-    icon: '⭐',
-    requiredLevel: 5
-  },
-  {
-    id: 'LEVEL_10',
+    id: 'level-2',
     name: 'Rising Star',
-    description: 'Reach level 10',
-    unlocked: false,
+    description: 'Reach Level 2',
+    icon: '⭐',
     completed: false,
-    progress: 1,
-    target: 10,
-    date: null,
-    icon: '⭐⭐',
-    requiredLevel: 10
+    unlocked: false,
+    requiredLevel: 2
+  },
+  {
+    id: 'level-5',
+    name: 'Emerging Leader',
+    description: 'Reach Level 5',
+    icon: '🌟',
+    completed: false,
+    unlocked: false,
+    requiredLevel: 5
   }
 ];
 
@@ -213,8 +175,8 @@ export const LEVEL_THRESHOLDS = [
   2100,  // Level 7: 2100-2799 XP
   2800,  // Level 8: 2800-3599 XP
   3600,  // Level 9: 3600-4499 XP
-  4500   // Level 10: 4500+ XP
-];
+  4500,  // Level 10: 4500+ XP
+] as const;
 
 export const LEVEL_TITLES = [
   'Apprentice',
@@ -262,32 +224,52 @@ export const FOUNDER_CLASSES: Record<FounderClass, { description: string; bonuse
 
 // Mock data for development
 export const MOCK_USER_DATA: User = {
-  id: 'mock-user-id',
+  id: 'mock-user',
   username: 'Solo Founder',
-  email: 'founder@example.com',
   xp: 0,
-  streak: 1,
-  longestStreak: 1,
-  lastActionDate: new Date().toISOString(),
-  momentum: {
-    multiplier: 1.0,
-    lastActionDate: new Date().toISOString(),
-    isActive: true,
-    streakDays: 1
-  },
-  actions: [],
-  achievements: ACHIEVEMENTS.map(a => ({
-    ...a,
-    unlocked: false,
-    completed: false,
-    progress: 0,
-    target: a.target || 1,
-    date: null
-  })),
+  level: 1,
   stats: {
-    execution: 10,
-    resilience: 8,
-    conviction: 12,
-    influence: 5
-  }
+    strength: 5,
+    intelligence: 7,
+    dexterity: 4,
+    charisma: 6
+  },
+  achievements: [
+    {
+      id: 'first-action',
+      name: 'First Step',
+      description: 'Complete your first founder action',
+      icon: '🎯',
+      completed: false,
+      unlocked: false,
+      progress: 0,
+      target: 1
+    },
+    {
+      id: 'level-2',
+      name: 'Rising Star',
+      description: 'Reach Level 2',
+      icon: '⭐',
+      completed: false,
+      unlocked: false,
+      requiredLevel: 2
+    },
+    {
+      id: 'level-5',
+      name: 'Emerging Leader',
+      description: 'Reach Level 5',
+      icon: '🌟',
+      completed: false,
+      unlocked: false,
+      requiredLevel: 5
+    }
+  ],
+  actions: [],
+  momentum: {
+    streak: 0,
+    multiplier: 1,
+    lastActionDate: '',
+    lastActionTimestamp: ''
+  },
+  lastActionDate: ''
 }; 

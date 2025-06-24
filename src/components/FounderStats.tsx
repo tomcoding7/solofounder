@@ -1,47 +1,100 @@
-import React from 'react';
 import { User } from '@/types/game';
+import { calculateLevel } from '@/utils/game';
 
 interface FounderStatsProps {
   user: User;
 }
 
-const FounderStats: React.FC<FounderStatsProps> = ({ user }) => {
-  const maxStat = 100;
+interface StatBarProps {
+  label: string;
+  value: number;
+  maxValue: number;
+}
 
-  const stats = [
-    { name: 'Execution', value: user.stats.execution, icon: '⚡' },
-    { name: 'Resilience', value: user.stats.resilience, icon: '🛡️' },
-    { name: 'Conviction', value: user.stats.conviction, icon: '🎯' },
-    { name: 'Influence', value: user.stats.influence, icon: '✨' },
-  ];
-
+const StatBar = ({ label, value, maxValue }: StatBarProps) => {
+  const percentage = (value / maxValue) * 100;
   return (
-    <div className="bg-black/30 backdrop-blur-md rounded-lg p-4 border border-purple-500/30">
-      <h2 className="text-xl font-orbitron text-purple-300 mb-4 flex items-center">
-        <span className="mr-2">📊</span>
-        Founder Stats
-      </h2>
-      <div className="space-y-4">
-        {stats.map((stat) => (
-          <div key={stat.name} className="relative">
-            <div className="flex justify-between items-center mb-1">
-              <div className="flex items-center">
-                <span className="text-lg mr-2">{stat.icon}</span>
-                <span className="text-gray-300">{stat.name}</span>
-              </div>
-              <span className="text-purple-300">{stat.value}</span>
-            </div>
-            <div className="h-2 bg-black/50 rounded overflow-hidden">
-              <div
-                className="h-full bg-purple-500 transition-all duration-500"
-                style={{ width: `${(stat.value / maxStat) * 100}%` }}
-              />
-            </div>
-          </div>
-        ))}
+    <div className="mb-2">
+      <div className="flex justify-between text-sm mb-1">
+        <span className="text-purple-300">{label}</span>
+        <span className="text-purple-400">{value}/{maxValue}</span>
+      </div>
+      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-purple-500 to-purple-700"
+          style={{ width: `${percentage}%` }}
+        />
       </div>
     </div>
   );
 };
 
-export default FounderStats; 
+export default function FounderStats({ user }: FounderStatsProps) {
+  const level = calculateLevel(user.xp);
+  
+  // Calculate RPG-style stats based on level and achievements
+  const completedAchievements = user.achievements.filter(a => a.completed).length;
+  const baseStats = {
+    strength: Math.floor(level * 5 + completedAchievements * 2),
+    intelligence: Math.floor(level * 7 + completedAchievements * 3),
+    dexterity: Math.floor(level * 4 + completedAchievements * 2),
+    charisma: Math.floor(level * 6 + completedAchievements * 2),
+  };
+
+  // Calculate max values for stats
+  const maxStats = {
+    strength: baseStats.strength + 20,
+    intelligence: baseStats.intelligence + 20,
+    dexterity: baseStats.dexterity + 20,
+    charisma: baseStats.charisma + 20,
+  };
+
+  return (
+    <div className="stat-panel space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-purple-300 solo-text-shadow">
+          Founder Stats
+        </h2>
+        <span className="level-badge">
+          Level {level}
+        </span>
+      </div>
+
+      <StatBar
+        label="Strength"
+        value={baseStats.strength}
+        maxValue={maxStats.strength}
+      />
+      <StatBar
+        label="Intelligence"
+        value={baseStats.intelligence}
+        maxValue={maxStats.intelligence}
+      />
+      <StatBar
+        label="Dexterity"
+        value={baseStats.dexterity}
+        maxValue={maxStats.dexterity}
+      />
+      <StatBar
+        label="Charisma"
+        value={baseStats.charisma}
+        maxValue={maxStats.charisma}
+      />
+
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="text-center p-2 bg-black/30 rounded-lg solo-border">
+          <div className="text-sm text-purple-400">Achievements</div>
+          <div className="text-lg font-bold text-purple-300">
+            {completedAchievements}
+          </div>
+        </div>
+        <div className="text-center p-2 bg-black/30 rounded-lg solo-border">
+          <div className="text-sm text-purple-400">Actions</div>
+          <div className="text-lg font-bold text-purple-300">
+            {user.actions.length}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 

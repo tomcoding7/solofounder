@@ -6,7 +6,7 @@
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 88, 28, 135;
+  --background-end-rgb: 20, 0, 40;
   --deep-space: 2, 6, 23;
   --neon-blue: 80, 200, 255;
   --neon-purple: 147, 51, 234;
@@ -22,7 +22,7 @@ body {
     rgb(var(--background-end-rgb))
   );
   min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Orbitron', sans-serif;
 }
 
 .font-orbitron {
@@ -63,19 +63,11 @@ body {
 }
 
 .action-button {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.action-button:hover {
-  border-color: rgba(var(--neon-blue), 0.5);
-  box-shadow: 
-    0 0 20px rgba(var(--neon-blue), 0.2),
-    inset 0 0 20px rgba(var(--neon-blue), 0.1);
-  transform: translateY(-2px);
+  @apply bg-black/60 hover:bg-purple-900/60 
+         backdrop-blur-sm rounded-lg p-4 
+         solo-border transition-all duration-300
+         hover:solo-glow hover:scale-105
+         active:scale-95 cursor-pointer;
 }
 
 .xp-bar {
@@ -146,21 +138,19 @@ body {
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(138, 43, 226, 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
+  background: rgba(138, 43, 226, 0.8);
 }
 
 /* Supabase Auth UI Customization */
@@ -194,4 +184,91 @@ body {
 
 .supabase-auth-container [data-mode="dark"] hr {
   @apply border-purple-500/30 !important;
+}
+
+/* Solo Leveling Theme */
+.solo-bg {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0b2e 50%, #261230 100%);
+}
+
+.solo-border {
+  border: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.solo-glow {
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+.solo-text-shadow {
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* Animations */
+@keyframes levelUp {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-level-up {
+  animation: levelUp 1s ease-in-out;
+}
+
+@keyframes pulse-purple {
+  0% {
+    box-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+  }
+}
+
+.animate-pulse-purple {
+  animation: pulse-purple 2s infinite;
+}
+
+/* Game UI Components */
+.stat-panel {
+  @apply bg-black/40 backdrop-blur-sm rounded-lg p-4 solo-border solo-glow;
+}
+
+.stat-value {
+  @apply text-purple-300 font-bold text-lg solo-text-shadow;
+}
+
+.stat-label {
+  @apply text-purple-400 text-sm;
+}
+
+.level-badge {
+  @apply bg-purple-900/60 text-purple-300
+         px-3 py-1 rounded-full text-sm
+         solo-border solo-glow font-bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stat-panel {
+    @apply p-3;
+  }
+  
+  .stat-value {
+    @apply text-base;
+  }
+  
+  .action-button {
+    @apply p-3;
+  }
 } 

@@ -1,6 +1,5 @@
-import React from 'react';
-import { calculateProgress } from '@/utils/game';
-import { LEVEL_THRESHOLDS } from '@/types/game';
+import { useEffect, useRef, useState } from 'react';
+import { calculateLevel, calculateProgress, getXPForNextLevel } from '@/utils/game';
 
 interface XPBarProps {
   xp: number;
@@ -8,33 +7,48 @@ interface XPBarProps {
   className?: string;
 }
 
-const XPBar: React.FC<XPBarProps> = ({ xp, level = 1, className = '' }) => {
+export default function XPBar({ xp, level, className = '' }: XPBarProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const prevXpRef = useRef(xp);
+  const nextLevelXp = getXPForNextLevel(xp);
   const progress = calculateProgress(xp);
-  const safeLevel = Math.max(1, Math.min(level, LEVEL_THRESHOLDS.length));
-  const currentThreshold = LEVEL_THRESHOLDS[safeLevel - 1] || 0;
-  const nextThreshold = safeLevel < LEVEL_THRESHOLDS.length 
-    ? LEVEL_THRESHOLDS[safeLevel]
-    : currentThreshold + 1000;
-  
-  const currentLevelXP = xp - currentThreshold;
-  const nextLevelXP = nextThreshold - currentThreshold;
+
+  // Trigger animation when XP changes
+  useEffect(() => {
+    if (xp !== prevXpRef.current) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 1000);
+      prevXpRef.current = xp;
+      return () => clearTimeout(timer);
+    }
+  }, [xp]);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('XPBar Update:', {
+      xp,
+      level,
+      nextLevelXp,
+      progress
+    });
+  }, [xp, level, nextLevelXp, progress]);
 
   return (
-    <div className={`bg-black/30 backdrop-blur-md rounded-lg p-4 border border-purple-500/30 ${className}`}>
+    <div className={`stat-panel ${className}`}>
       <div className="flex justify-between items-center mb-2">
-        <div className="font-orbitron text-xl text-purple-300">Level {safeLevel}</div>
-        <div className="text-gray-300">
-          {currentLevelXP} / {nextLevelXP} XP
+        <div className="text-sm text-purple-300">Level {level}</div>
+        <div className="text-sm text-purple-400">
+          {xp} / {nextLevelXp} XP
         </div>
       </div>
-      <div className="h-4 bg-black/50 rounded-full overflow-hidden">
+      <div className="w-full h-4 bg-black/30 rounded-full overflow-hidden solo-border">
         <div
-          className="h-full bg-purple-500 transition-all duration-500"
+          className={`h-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-1000 ${
+            isAnimating ? 'animate-pulse' : ''
+          }`}
           style={{ width: `${progress}%` }}
         />
       </div>
     </div>
   );
-};
-
-export default XPBar; 
+} 
